@@ -12,25 +12,29 @@ public class UserDAO extends BaseDAO<User> implements CrudRepository<User> {
 
     @Override
     public User save(User user) {
-        String sql = "INSERT INTO users (username, password) VALUES (?, ?) RETURNING id";
+        String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        // Use a try-with-resources block to ensure connection is closed
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            stmt.setString(1, user.getUsername());
-            stmt.setString(2, user.getPassword());
+            // Set the query parameters
+            statement.setString(1, user.getUsername());
+            statement.setString(2, user.getPassword());
 
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                user.setId(rs.getInt("id"));
-                logAction("INSERT INTO users");
-                return user;
-            } else {
-                throw new RuntimeException("Failed to save user.");
-            }
+            // Execute the query
+            statement.executeUpdate();
+            System.out.println("Registration successful!");
+            return user;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to save user: " + e.getMessage());
+            // Handle unique constraint violation for username
+            if ("23505".equals(e.getSQLState())) { // PostgreSQL specific for unique constraint violations
+                System.err.println("Username is already taken.");
+            } else {
+                System.err.println("Failed to save user: " + e.getMessage());
+            }
+            return null; // Return null on failure
         }
     }
 

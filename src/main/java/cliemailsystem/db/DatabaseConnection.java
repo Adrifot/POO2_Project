@@ -12,7 +12,7 @@ public class DatabaseConnection {
 
     private DatabaseConnection() {}
 
-    public static Connection getConnection() {
+    public static Connection getConnection() throws SQLException {
         if (connection == null) {
             try {
                 connection = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -21,6 +21,8 @@ public class DatabaseConnection {
                 throw new RuntimeException("Failed to connect to the database: " + e.getMessage());
             }
         }
-        return connection;
+        connection.setAutoCommit(true);
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+
     }
 }
