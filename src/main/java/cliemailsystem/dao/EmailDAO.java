@@ -12,7 +12,7 @@ public class EmailDAO extends BaseDAO<Email> implements CrudRepository<Email> {
 
     @Override
     public Email save(Email email) {
-        String sql = "INSERT INTO emails (from_user_id, to_user_id, timestamp, subject, content, status) VALUES (?, ?, ?, ?, ?, ?) RETURNING id";
+        String sql = "INSERT INTO emails (from_user_id, to_user_id, created_at, subject, content, status) VALUES (?, ?, ?, ?, ?, ?) RETURNING id";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -167,6 +167,21 @@ public class EmailDAO extends BaseDAO<Email> implements CrudRepository<Email> {
 
         return inbox;
     }
+
+    public String formatEmailWithUsernames(Email email) {
+        UserDAO userDAO = new UserDAO();
+        String fromUsername = userDAO.findUsernameById(email.getFromUserId());
+        String toUsername = userDAO.findUsernameById(email.getToUserId());
+
+        return String.format("From: %s (ID: %d)\nTo: %s (ID: %d)\nSubject: %s\nContent: %s\nDate: %s\nStatus: %s",
+                fromUsername, email.getFromUserId(),
+                toUsername, email.getToUserId(),
+                email.getSubject(),
+                email.getContent(),
+                email.getTimestamp(),
+                email.getStatus());
+    }
+
 
 }
 

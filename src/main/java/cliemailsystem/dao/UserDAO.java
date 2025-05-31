@@ -3,11 +3,14 @@ package cliemailsystem.dao;
 import cliemailsystem.db.DatabaseConnection;
 import cliemailsystem.entities.User;
 import cliemailsystem.exceptions.UserNotFoundException;
+import cliemailsystem.exceptions.UsernameNotFoundException;
 import cliemailsystem.interfaces.CrudRepository;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UserDAO extends BaseDAO<User> implements CrudRepository<User> {
 
@@ -35,7 +38,7 @@ public class UserDAO extends BaseDAO<User> implements CrudRepository<User> {
             } else {
                 System.err.println("Failed to save user: " + e.getMessage());
             }
-            return null; // Return null on failure
+            return null;
         }
     }
 
@@ -161,5 +164,77 @@ public class UserDAO extends BaseDAO<User> implements CrudRepository<User> {
             throw new RuntimeException("Failed to fetch user by username: " + e.getMessage());
         }
     }
+
+    public Map<Integer, String> getUserIdToUsername() {
+        String sql = "SELECT id, username FROM users";
+        Map<Integer, String> idToUsernameMap = new HashMap<>();
+
+        try (
+                Connection conn = DatabaseConnection.getConnection();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String username = rs.getString("username");
+                idToUsernameMap.put(id, username);
+            }
+
+            return idToUsernameMap;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch user by username: " + e.getMessage());
+        }
+    }
+
+    public Map<String, Integer> getUsernameToUserIdMap() {
+        Map<Integer, String> idToUsername = getUserIdToUsername();
+        Map<String, Integer> usernameToId = new HashMap<>();
+
+        for (Map.Entry<Integer, String> entry : idToUsername.entrySet()) {
+            usernameToId.put(entry.getValue(), entry.getKey());
+        }
+
+        return usernameToId;
+    }
+
+    public int findUserIdByUsername(String username) {
+        String sql = "SELECT id FROM users WHERE username = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("id");
+            } else {
+                throw new UsernameNotFoundException(username);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to retrieve user ID: " + e.getMessage(), e);
+        }
+    }
+
+    public String findUsernameById(int userId) {
+        String sql = "SELECT username FROM users WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("username");
+            } else {
+                throw new UserNotFoundException(userId);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to retrieve username: " + e.getMessage(), e);
+        }
+    }
+
 
 }

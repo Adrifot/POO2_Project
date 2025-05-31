@@ -3,6 +3,8 @@ package cliemailsystem.service;
 import cliemailsystem.dao.EmailDAO;
 import cliemailsystem.dao.UserDAO;
 import cliemailsystem.entities.Email;
+import cliemailsystem.exceptions.UserNotFoundException;
+import cliemailsystem.exceptions.UsernameNotFoundException;
 
 import java.util.List;
 import java.util.Scanner;
@@ -34,41 +36,44 @@ public class EmailService {
     private void viewInbox(int currentUserId) {
         List<Email> inbox = emailDAO.findAllForUser(currentUserId);
         if (inbox.isEmpty()) {
-            System.out.println("Your inbox is empty.");
+            System.out.println("\nYour inbox is empty.\n");
         } else {
+            UserDAO userDAO = new UserDAO();
             System.out.println("Your Inbox:");
-            for (Email email : inbox) {
-                System.out.println("---------------------------------");
-                System.out.println("From: User " + email.getFromUserId());
-                System.out.println("To: User " + email.getToUserId());
-                System.out.println("Subject: " + email.getSubject());
-                System.out.println("Content:");
-                System.out.println(email.getContent());
-                System.out.println("---------------------------------");
+            for (int i=0; i<inbox.size(); i++) {
+                Email email = inbox.get(i);
+                String senderUsername = userDAO.findUsernameById(email.getFromUserId());
+                System.out.println((i+1) + ". " + "From: " + senderUsername + "\n" + " | Subject: " + email.getSubject() +
+                        "\n" + " | Content: " + email.getContent() + "\n");
             }
         }
     }
 
-    // Find the method that handles email composition and update it to:
-
     public void composeEmail(Scanner scanner, int currentUserId) {
-        System.out.print("Enter recipient ID: ");
-        String recipientIdStr = scanner.nextLine();
-        int recipientId;
+        System.out.print("Enter recipient username or ID: ");
+        String recipient = scanner.nextLine();
 
-        try {
-            recipientId = Integer.parseInt(recipientIdStr);
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid ID format. Please enter a number.");
-            return;
-        }
-
-        // Validate that the recipient exists
+        int recipientId = 0;
         UserDAO userDAO = new UserDAO();
+
         try {
-            userDAO.findById(recipientId); // This will throw an exception if user doesn't exist
+            // Check if input is a number (ID) or username
+            if (recipient.matches("\\d+")) {
+                recipientId = Integer.parseInt(recipient);
+                // Validate ID exists
+                userDAO.findById(recipientId);
+            } else {
+                // Input is a username, find corresponding ID
+                recipientId = userDAO.findUserIdByUsername(recipient);
+            }
+        } catch (UserNotFoundException | UsernameNotFoundException e) {
+            System.out.println("Error: " + e.getMessage());
+            return;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid ID format.");
+            return;
         } catch (RuntimeException e) {
-            System.out.println("Error: Recipient with ID " + recipientId + " does not exist.");
+            System.out.println("Database error: " + e.getMessage());
             return;
         }
 
@@ -83,8 +88,8 @@ public class EmailService {
         try {
             EmailDAO emailDAO = new EmailDAO();
             emailDAO.save(email);
-            System.out.println("Email sent successfully!");
-        } catch (RuntimeException e) {
+            System.out.println("Email sent successfully to " + userDAO.findUsernameById(recipientId) + "!");
+        } catch (Exception e) {
             System.out.println("Failed to send email: " + e.getMessage());
         }
     }
