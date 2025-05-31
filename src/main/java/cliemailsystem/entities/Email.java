@@ -6,7 +6,7 @@ public class Email {
     private int id; // Primary key in DB
     private final int fromUserId;
     private final int toUserId;
-    private final LocalDateTime timestamp;
+    private final LocalDateTime created_at;
     private final String subject;
     private final String content;
     private EmailStatus status;
@@ -16,7 +16,7 @@ public class Email {
         this.toUserId = toUserId;
         this.subject = subject;
         this.content = content;
-        this.timestamp = LocalDateTime.now();
+        this.created_at = LocalDateTime.now();
         this.status = EmailStatus.NEW;
     }
 
@@ -26,7 +26,7 @@ public class Email {
         this.toUserId = toUserId;
         this.subject = subject;
         this.content = content;
-        this.timestamp = createdAt;
+        this.created_at = createdAt;
     }
 
     public int getId() {
@@ -42,7 +42,7 @@ public class Email {
     }
 
     public LocalDateTime getTimestamp() {
-        return timestamp;
+        return created_at;
     }
 
     public String getSubject() {
