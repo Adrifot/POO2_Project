@@ -2,6 +2,7 @@ package cliemailsystem.dao;
 
 import cliemailsystem.db.DatabaseConnection;
 import cliemailsystem.entities.User;
+import cliemailsystem.exceptions.UserNotFoundException;
 import cliemailsystem.interfaces.CrudRepository;
 
 import java.sql.*;
@@ -40,6 +41,7 @@ public class UserDAO extends BaseDAO<User> implements CrudRepository<User> {
 
     @Override
     public User findById(int id) {
+
         String sql = "SELECT * FROM users WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -56,7 +58,7 @@ public class UserDAO extends BaseDAO<User> implements CrudRepository<User> {
                 logAction("SELECT user by ID: " + id);
                 return user;
             } else {
-                throw new RuntimeException("User with ID: " + id + " was not found.");
+                throw new UserNotFoundException(id);
             }
 
         } catch (SQLException e) {
