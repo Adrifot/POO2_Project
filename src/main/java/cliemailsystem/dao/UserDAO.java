@@ -4,7 +4,7 @@ import cliemailsystem.db.DatabaseConnection;
 import cliemailsystem.entities.User;
 import cliemailsystem.exceptions.UserNotFoundException;
 import cliemailsystem.exceptions.UsernameNotFoundException;
-import cliemailsystem.interfaces.CrudRepository;
+import cliemailsystem.interfaces.CRUDable;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,27 +12,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class UserDAO extends BaseDAO<User> implements CrudRepository<User> {
+public class UserDAO extends BaseDAO<User> implements CRUDable<User> {
 
     @Override
     public User save(User user) {
         String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
 
-        // Use a try-with-resources block to ensure connection is closed
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            // Set the query parameters
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getPassword());
 
-            // Execute the query
             statement.executeUpdate();
             System.out.println("Registration successful!");
             return user;
 
         } catch (SQLException e) {
-            // Handle unique constraint violation for username
             if ("23505".equals(e.getSQLState())) { // PostgreSQL specific for unique constraint violations
                 System.err.println("Username is already taken.");
             } else {

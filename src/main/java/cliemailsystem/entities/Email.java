@@ -65,6 +65,10 @@ public class Email {
         this.id = id;
     }
 
+    public void setStatus(EmailStatus status) {
+        this.status = status;
+    }
+
     public enum EmailStatus {
         NEW,
         READ,

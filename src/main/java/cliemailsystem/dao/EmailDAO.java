@@ -2,13 +2,13 @@ package cliemailsystem.dao;
 
 import cliemailsystem.db.DatabaseConnection;
 import cliemailsystem.entities.Email;
-import cliemailsystem.interfaces.CrudRepository;
+import cliemailsystem.interfaces.CRUDable;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EmailDAO extends BaseDAO<Email> implements CrudRepository<Email> {
+public class EmailDAO extends BaseDAO<Email> implements CRUDable<Email> {
 
     @Override
     public Email save(Email email) {
@@ -55,7 +55,7 @@ public class EmailDAO extends BaseDAO<Email> implements CrudRepository<Email> {
                         rs.getString("content")
                 );
                 email.setId(rs.getInt("id"));
-                email.markAsRead(); // Marks email as read when accessed
+                email.markAsRead();
                 logAction("SELECT email by ID: " + id);
                 return email;
             } else {
@@ -158,6 +158,17 @@ public class EmailDAO extends BaseDAO<Email> implements CrudRepository<Email> {
                         rs.getString("content"),
                         rs.getTimestamp("created_at").toLocalDateTime()
                 );
+                String statusStr = rs.getString("status");
+                if (statusStr != null) {
+                    try {
+                        email.setStatus(Email.EmailStatus.valueOf(statusStr));
+                    } catch (IllegalArgumentException e) {
+                        email.setStatus(Email.EmailStatus.NEW);
+                    }
+                } else {
+                    email.setStatus(Email.EmailStatus.NEW);
+                }
+
                 inbox.add(email);
             }
 
@@ -181,7 +192,5 @@ public class EmailDAO extends BaseDAO<Email> implements CrudRepository<Email> {
                 email.getTimestamp(),
                 email.getStatus());
     }
-
-
 }
 

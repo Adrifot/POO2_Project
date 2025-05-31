@@ -20,7 +20,6 @@ public class Main {
             System.out.println("1. Register");
             System.out.println("2. Log In");
             System.out.println("3. Exit");
-            System.out.print("Choose an option: ");
 
             int option = getValidOption(scanner);
 
