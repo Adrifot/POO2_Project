@@ -49,14 +49,4 @@ public class User {
         return dao.save(this);
     }
 
-    public boolean login(UserDAO dao) {
-        User userFromDB = dao.findByUsername(this.username);
-
-        if (userFromDB != null && userFromDB.getPassword().equals(this.password)) {
-            this.id = userFromDB.getId(); // Set the ID from the authenticated user
-            return true;
-        } else {
-            return false;
-        }
-    }
 }

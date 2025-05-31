@@ -1,5 +1,6 @@
 package cliemailsystem.dao;
 
+import cliemailsystem.audit.AuditLogger;
 import cliemailsystem.db.DatabaseConnection;
 import cliemailsystem.entities.Email;
 import cliemailsystem.interfaces.CRUDable;
@@ -30,7 +31,6 @@ public class EmailDAO extends BaseDAO<Email> implements CRUDable<Email> {
                 email.setId(rs.getInt("id"));
             }
 
-            logAction("INSERT INTO emails");
             return email;
 
         } catch (SQLException e) {
@@ -56,7 +56,6 @@ public class EmailDAO extends BaseDAO<Email> implements CRUDable<Email> {
                 );
                 email.setId(rs.getInt("id"));
                 email.markAsRead();
-                logAction("SELECT email by ID: " + id);
                 return email;
             } else {
                 throw new RuntimeException("Email with ID: " + id + " not found.");
@@ -87,7 +86,6 @@ public class EmailDAO extends BaseDAO<Email> implements CRUDable<Email> {
                 emails.add(email);
             }
 
-            logAction("SELECT all emails");
             return emails;
 
         } catch (SQLException e) {
@@ -107,7 +105,7 @@ public class EmailDAO extends BaseDAO<Email> implements CRUDable<Email> {
 
             int rowsUpdated = stmt.executeUpdate();
             if (rowsUpdated > 0) {
-                logAction("UPDATE email with ID: " + email.getId());
+                AuditLogger.getInstance().log("Email#" + email.getId() + " updated");
                 return email;
             } else {
                 throw new RuntimeException("Failed to update email with ID: " + email.getId());
@@ -128,9 +126,7 @@ public class EmailDAO extends BaseDAO<Email> implements CRUDable<Email> {
             stmt.setInt(1, id);
 
             int rowsDeleted = stmt.executeUpdate();
-            if (rowsDeleted > 0) {
-                logAction("DELETE email by ID: " + id);
-            } else {
+            if (rowsDeleted <= 0) {
                 throw new RuntimeException("Failed to delete email with ID: " + id);
             }
 
@@ -179,18 +175,5 @@ public class EmailDAO extends BaseDAO<Email> implements CRUDable<Email> {
         return inbox;
     }
 
-    public String formatEmailWithUsernames(Email email) {
-        UserDAO userDAO = new UserDAO();
-        String fromUsername = userDAO.findUsernameById(email.getFromUserId());
-        String toUsername = userDAO.findUsernameById(email.getToUserId());
-
-        return String.format("From: %s (ID: %d)\nTo: %s (ID: %d)\nSubject: %s\nContent: %s\nDate: %s\nStatus: %s",
-                fromUsername, email.getFromUserId(),
-                toUsername, email.getToUserId(),
-                email.getSubject(),
-                email.getContent(),
-                email.getTimestamp(),
-                email.getStatus());
-    }
 }
 

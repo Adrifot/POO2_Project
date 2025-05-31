@@ -17,7 +17,4 @@ public abstract class BaseDAO<T> {
 
     public abstract void deleteById(int id);
 
-    protected void logAction(String action) {
-        logger.log(action);
-    }
 }

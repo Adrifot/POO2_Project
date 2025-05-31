@@ -54,7 +54,7 @@ public class UserDAO extends BaseDAO<User> implements CRUDable<User> {
                 user.setId(rs.getInt("id"));
                 user.setUsername(rs.getString("username"));
                 user.setPassword(rs.getString("password"));
-                logAction("SELECT user by ID: " + id);
+
                 return user;
             } else {
                 throw new UserNotFoundException(id);
@@ -82,7 +82,6 @@ public class UserDAO extends BaseDAO<User> implements CRUDable<User> {
                 users.add(user);
             }
 
-            logAction("SELECT all users");
             return users;
 
         } catch (SQLException e) {
@@ -103,7 +102,7 @@ public class UserDAO extends BaseDAO<User> implements CRUDable<User> {
 
             int rowsUpdated = stmt.executeUpdate();
             if (rowsUpdated > 0) {
-                logAction("UPDATE user with ID: " + user.getId());
+
                 return user;
             } else {
                 throw new RuntimeException("User with ID: " + user.getId() + " could not be updated.");
@@ -125,7 +124,7 @@ public class UserDAO extends BaseDAO<User> implements CRUDable<User> {
 
             int rowsDeleted = stmt.executeUpdate();
             if (rowsDeleted > 0) {
-                logAction("DELETE user by ID: " + id);
+
             } else {
                 throw new RuntimeException("Could not delete user with ID: " + id);
             }
@@ -150,7 +149,7 @@ public class UserDAO extends BaseDAO<User> implements CRUDable<User> {
                         rs.getString("username"),
                         rs.getString("password")
                 );
-                logAction("SELECT user by username: " + username);
+
                 return user;
             } else {
                 return null; // No user found with the given username
@@ -181,17 +180,6 @@ public class UserDAO extends BaseDAO<User> implements CRUDable<User> {
         } catch (SQLException e) {
             throw new RuntimeException("Failed to fetch user by username: " + e.getMessage());
         }
-    }
-
-    public Map<String, Integer> getUsernameToUserIdMap() {
-        Map<Integer, String> idToUsername = getUserIdToUsername();
-        Map<String, Integer> usernameToId = new HashMap<>();
-
-        for (Map.Entry<Integer, String> entry : idToUsername.entrySet()) {
-            usernameToId.put(entry.getValue(), entry.getKey());
-        }
-
-        return usernameToId;
     }
 
     public int findUserIdByUsername(String username) {
