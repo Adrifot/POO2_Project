@@ -34,7 +34,7 @@ public class Main {
                     running = false;
                     System.out.println("Goodbye!");
                 }
-                case 4 -> showHelp();
+
                 default -> System.out.println("Invalid option. Try again!");
             }
         }
@@ -52,29 +52,7 @@ public class Main {
             }
         }
     }
-
-    private static void showHelp() {
-        System.out.println("Help Menu:");
-        System.out.println("1. Register: Create a new account by entering a username and password.");
-        System.out.println("2. Log In: Log in to the system to view and manage your emails.");
-        System.out.println("3. Exit: Quit the application.");
-        System.out.println("4. Help: View this help menu.");
-    }
-
 }
 
-//package cliemailsystem.app;
-//import cliemailsystem.db.DatabaseConnection;
-//
-//import java.sql.Connection;
-//import java.sql.SQLException;
-//public class Main {
-//    public static void main(String[] args) {
-//        try (Connection conn = DatabaseConnection.getConnection()) {
-//            System.out.println("Database connected successfully!");
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//}
+
 
