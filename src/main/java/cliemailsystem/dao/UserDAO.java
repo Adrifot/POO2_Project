@@ -219,6 +219,4 @@ public class UserDAO extends BaseDAO<User> implements CRUDable<User> {
             throw new RuntimeException("Failed to retrieve username: " + e.getMessage(), e);
         }
     }
-
-
 }

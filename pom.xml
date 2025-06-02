@@ -22,7 +22,6 @@
     </repositories>
 
     <dependencies>
-        <!-- Correctly placed dependency inside the <dependencies> block -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>

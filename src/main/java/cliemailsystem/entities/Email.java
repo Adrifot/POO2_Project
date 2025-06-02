@@ -3,7 +3,7 @@ package cliemailsystem.entities;
 import java.time.LocalDateTime;
 
 public class Email {
-    private int id; // Primary key in DB
+    private int id;
     private final int fromUserId;
     private final int toUserId;
     private final LocalDateTime created_at;
